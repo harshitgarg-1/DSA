@@ -16,7 +16,6 @@ class Solution {
         ListNode curr = head;
         int count = 1;
         while(curr != null){
-            ListNode next = curr.next;
             if(count % 2 == 0){
                 even.next = curr;
                 even = even.next;
@@ -24,10 +23,10 @@ class Solution {
                 odd.next = curr;
                 odd = odd.next;
             }
-            curr.next = null;
-            curr = next;
+            curr = curr.next;
             count++;
         }
+        even.next = null;
         odd.next = newEvenHead.next;
         return newOddHead.next;
     }
