@@ -43,7 +43,7 @@ class Solution {
                 }
             }
         }
-        return effort[n-1][m-1];
+        return -1;
         
     }
 }
