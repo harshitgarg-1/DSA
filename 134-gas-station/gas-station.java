@@ -5,9 +5,9 @@ class Solution {
             if(gas[i]>=cost[i] && index == -1){
                 index = i;
             }
-            giving += gas[i] - cost[i];
+            if(index != -1) giving += gas[i] - cost[i];
             req += gas[i] - cost[i];
-            if(gas[i]<cost[i] && index != -1 && giving<0){
+            if(giving<0){
                 index = -1;
                 giving=0;
             }
