@@ -16,7 +16,6 @@ class Solution {
         for(int i=0;i<n;i++){
             degree.add(360+degree.get(i));
         }
-        System.out.println(degree);
         int ans = 1;
         if(degree.size()==0) ans=0;
         int i=0,j=1;
