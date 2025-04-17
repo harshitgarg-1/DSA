@@ -10,7 +10,7 @@ class Solution {
             Arrays.fill(row, Integer.MAX_VALUE);
         }
 
-        minHeap.offer(new int[]{0, 0, 0}); // time, x, y
+        minHeap.offer(new int[]{0, 0, 0});
         time[0][0] = 0;
 
         int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
@@ -18,6 +18,8 @@ class Solution {
         while (!minHeap.isEmpty()) {
             int[] current = minHeap.poll();
             int currentTime = current[0], x = current[1], y = current[2];
+            if(time[x][y]==1) continue;
+            time[x][y] = 1;
 
             if (x == rows - 1 && y == cols - 1) {
                 return currentTime;
@@ -26,18 +28,14 @@ class Solution {
             for (int[] dir : directions) {
                 int newX = x + dir[0], newY = y + dir[1];
 
-                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols) {
+                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols && time[newX][newY]!=1) {
                     int waitTime = Math.max(moveTime[newX][newY] - currentTime, 0);
                     int newTime = currentTime + 1 + waitTime;
-
-                    if (newTime < time[newX][newY]) {
-                        time[newX][newY] = newTime;
-                        minHeap.offer(new int[]{newTime, newX, newY});
-                    }
+                    minHeap.offer(new int[]{newTime, newX, newY});
                 }
             }
         }
 
-        return -1; // unreachable
+        return -1;
     }
 }
