@@ -20,9 +20,9 @@ class Solution {
             int[] currentState = priorityQueue.poll();
             int currentTime = currentState[0], currentRow = currentState[1], currentCol = currentState[2], currentStepCost = currentState[3];
 
-            if (currentRow == totalRows - 1 && currentCol == totalCols - 1) {
-                return currentTime;
-            }
+            // if (currentRow == totalRows - 1 && currentCol == totalCols - 1) {
+            //     return currentTime;
+            // }
 
             for (int[] direction : adjacentDirections) {
                 int nextRow = currentRow + direction[0];
@@ -40,6 +40,6 @@ class Solution {
             }
         }
 
-        return -1;
+        return minimumArrivalTime[totalRows-1][totalCols-1];
     }
 }
