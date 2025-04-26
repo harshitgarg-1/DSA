@@ -1,45 +1,44 @@
 class Solution {
 
-    public int shortestSubarray(int[] nums, int k) {
+    public int shortestSubarray(int[] nums, int targetSum) {
         int n = nums.length;
 
-        // Initialize result to the maximum possible integer value
+        // Size is n+1 to handle subarrays starting from index 0
+        long[] prefixSums = new long[n + 1];
+
+        // Calculate prefix sums
+        for (int i = 1; i <= n; i++) {
+            prefixSums[i] = prefixSums[i - 1] + nums[i - 1];
+        }
+
+        Deque<Integer> candidateIndices = new ArrayDeque<>();
+
         int shortestSubarrayLength = Integer.MAX_VALUE;
 
-        long cumulativeSum = 0;
-
-        // Min-heap to store cumulative sum and its corresponding index
-        PriorityQueue<Pair<Long, Integer>> prefixSumHeap = new PriorityQueue<>(
-            (a, b) -> Long.compare(a.getKey(), b.getKey())
-        );
-
-        // Iterate through the array
-        for (int i = 0; i < n; i++) {
-            // Update cumulative sum
-            cumulativeSum += nums[i];
-
-            // If cumulative sum is already >= k, update shortest length
-            if (cumulativeSum >= k) {
-                shortestSubarrayLength = Math.min(
-                    shortestSubarrayLength,
-                    i + 1
-                );
-            }
-
-            // Remove subarrays from heap that can form a valid subarray
+        for (int i = 0; i <= n; i++) {
+            // Remove candidates from front of deque where subarray sum meets target
             while (
-                !prefixSumHeap.isEmpty() &&
-                cumulativeSum - prefixSumHeap.peek().getKey() >= k
+                !candidateIndices.isEmpty() &&
+                prefixSums[i] - prefixSums[candidateIndices.peekFirst()] >=
+                targetSum
             ) {
                 // Update shortest subarray length
                 shortestSubarrayLength = Math.min(
                     shortestSubarrayLength,
-                    i - prefixSumHeap.poll().getValue()
+                    i - candidateIndices.pollFirst()
                 );
             }
 
-            // Add current cumulative sum and index to heap
-            prefixSumHeap.offer(new Pair<>(cumulativeSum, i));
+            // Maintain monotonicity by removing indices with larger prefix sums
+            while (
+                !candidateIndices.isEmpty() &&
+                prefixSums[i] <= prefixSums[candidateIndices.peekLast()]
+            ) {
+                candidateIndices.pollLast();
+            }
+
+            // Add current index to candidates
+            candidateIndices.offerLast(i);
         }
 
         // Return -1 if no valid subarray found
