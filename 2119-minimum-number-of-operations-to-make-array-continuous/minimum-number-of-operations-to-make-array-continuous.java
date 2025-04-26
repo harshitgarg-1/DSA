@@ -1,7 +1,7 @@
 class Solution {
     public int minOperations(int[] nums) {
         int n = nums.length;
-        int ans = n;
+        int ans = n-1;
         
         HashSet<Integer> unique = new HashSet<>();
         for (int num : nums) {
