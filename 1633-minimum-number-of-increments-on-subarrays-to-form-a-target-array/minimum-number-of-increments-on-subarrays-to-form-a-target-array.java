@@ -2,18 +2,18 @@ class Solution {
     public int minNumberOperations(int[] target) {
         Stack <Integer> stack = new Stack<>();
         stack.push(0);
-        int result = 0;
+        int result = 0, prev = 0;
 
         for (int num: target) {
-            if (num > stack.peek()) {
-                result += num - stack.peek();
+            if (num > prev) {
+                result += num - prev;
             }
 
-            while (num <= stack.peek()) {
-                stack.pop();
-            }
+            // while (num <= stack.peek()) {
+            //     stack.pop();
+            // }
 
-            stack.push(num);
+            prev = num;
         }
 
         return result;
