@@ -1,72 +1,28 @@
-class Solution 
-{
-    public int beautifulSplits(int[] nums) 
-    {
-        int n = nums.length;
-        if (n < 3)
-        {
-            return 0; // We need at least 3 elements to make a valid split
-        }
-        
-        long mod = 1_000_000_007;
-        long base = 31;
-        
-        // Compute prefix hashes
-        long[] prefixHash = new long[n + 1]; // Hash for prefix [0..i)
-        long[] pow = new long[n + 1]; // Store powers of base
-        
-        pow[0] = 1;
-        for (int i = 0; i < n; i++) 
-        {
-            pow[i + 1] = (pow[i] * base) % mod;
-            prefixHash[i + 1] = (prefixHash[i] * base + nums[i]) % mod;
-        }
-
-        int count = 0;
-
-        // Iterate over possible i and j such that 1 <= i < j < n
-        for (int i = 1; i < n - 1; i++) 
-        {
-            for (int j = i + 1; j < n; j++) 
-            {
-                boolean valid = false;
-                
-                // Check if nums1 is a prefix of nums2
-                if (isPrefix(prefixHash, 0, i, i, j, mod, pow)) 
-                {
-                    valid = true;
-                }
-                
-                // Check if nums2 is a prefix of nums3
-                if (!valid && isPrefix(prefixHash, i, j, j, n, mod, pow)) 
-                {
-                    valid = true;
-                }
-
-                if (valid) 
-                {
-                    count++;
+class Solution {
+    public int beautifulSplits(int[] nums) {
+        int n = nums.length  ;
+        int ways = 0;
+        int[][] dp =  new int[n+1][n+1];
+        for (int i = n-1; i>=0 ; i-- ){
+            for (int j = i; j <n ; j++){// keeps cnt of same number (int prefixSubArrays, starting i,j)
+                if (nums[i] == nums[j]){
+                    dp[i][j] = dp[i+1][j+1] + 1;// same elements (adding the cnt of forward same nums)
                 }
             }
         }
-
-        return count;
-    }
-
-    // Helper function to compare hashes of two subarrays
-    private boolean isPrefix(long[] hash, int start1, int end1, int start2, int end2, long mod, long[] pow) 
-    {
-        int len1 = end1 - start1;
-        int len2 = end2 - start2;
-
-        if (len1 > len2)
-        {
-            return false;
+        // nums1 = nums[0:i+1]
+        // nums2 = nums[i+1 : j+1]
+        // nums3 = nums[j+1 : n]
+        for (int i = 0 ; i<n-1 ; i++){// firstSplit 0 to i
+            for (int j = i+1;  j<n-1 ; j++){ // second Split i+1 to n-1 (3rd part atleast 1 element)
+                boolean firstPrefix =( i+1 <= j-i ) && (dp[0][i+1] >= i+1);
+                boolean secPrefix = (j-i <= n-j ) && (dp[i+1][j+1] >= j-i);
+                if (firstPrefix || secPrefix){
+                    ways++;
+                }
+            }
         }
-
-        long hash1 = (hash[end1] - (hash[start1] * pow[len1]) % mod + mod) % mod;
-        long hash2 = (hash[start2 + len1] - (hash[start2] * pow[len1]) % mod + mod) % mod;
-
-        return hash1 == hash2;
+        
+        return ways;
     }
 }
