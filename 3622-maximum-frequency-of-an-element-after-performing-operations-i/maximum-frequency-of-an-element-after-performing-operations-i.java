@@ -1,39 +1,35 @@
 class Solution {
     public int maxFrequency(int[] nums, int k, int numOperations) {
-        int n = nums.length, ans = 0, left = 0, right = 0;
-        Arrays.sort(nums);
 
-        // HashMap to store the frequency of each number in the sorted array
-        HashMap<Integer, Integer> count = new HashMap<>();
-        for(int num : nums) count.put(num, count.getOrDefault(num, 0) + 1);
+        int max = 0, min = Integer.MAX_VALUE;
 
-        // First pass: choose an existing number as the "reference point"
-        for(int mid = 0; mid < n; mid++) {
-            // Move the left pointer to maintain that the difference between nums[mid] and nums[left] is <= k
-            while(nums[mid] - nums[left] > k) {
-                left++;
-            }
-
-            // Move the right pointer to maintain that the difference between nums[right] and nums[mid] is <= k
-            while(right < n - 1 && nums[right + 1] - nums[mid] <= k) {
-                right++;
-            }
-
-            int total = right - left + 1; // total elements in the current range
-            ans = Math.max(ans, Math.min(total - count.get(nums[mid]), numOperations) + count.get(nums[mid]));
+        for (int i : nums) {
+            max = Math.max(max, i);
+            min = Math.min(min, i);
         }
 
-        // Second pass: choose a non-existent number as the "reference point"
-        left = 0;
-        for(right = 0; right < n; right++) {
-            int mid = (nums[left] + nums[right]) / 2;
-
-            // Move the left pointer until the mid-point falls within range [nums[left], nums[right]]
-            while(mid - nums[left] > k || nums[right] - mid > k) {
-                left++;
-                mid = (nums[left] + nums[right]) / 2;
+        int[] freq = new int[max + 1];
+        int[] prefix = new int[max + 1];
+        for (int i : nums) {
+            freq[i]++;
+        }
+        for (int i = min; i <= max; i++) {
+            prefix[i] = prefix[i - 1] + freq[i];
+        }
+        int ans = 0;
+        for (int i = min; i <= max; i++) {
+            int low = 0;
+            if (i - k - 1 > 0) {
+                low = prefix[i - k - 1];
             }
-            ans = Math.max(ans, Math.min(right - left + 1, numOperations));
+            int high = 0;
+            if (i + k <= max) {
+                high = prefix[i + k];
+            } else {
+                high = prefix[max];
+            }
+            int toChange = high - low - freq[i];
+            ans = Math.max(ans, freq[i] + (toChange >= numOperations ? numOperations : toChange));
         }
 
         return ans;
