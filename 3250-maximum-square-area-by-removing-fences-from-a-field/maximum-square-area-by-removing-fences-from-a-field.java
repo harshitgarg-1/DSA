@@ -7,7 +7,7 @@ class Solution {
     hFen[hFences.length] = 1; hFen[hFences.length + 1] = m;
     vFen[vFences.length] = 1; vFen[vFences.length + 1] = n;
     for(int i = 0; i < hFen.length; ++i){
-        for(int j = 0; j < hFen.length; ++j){
+        for(int j = i+1; j < hFen.length; ++j){
             if(i != j ) hs.add(Math.abs(hFen[i] - hFen[j]));
         }
     }
