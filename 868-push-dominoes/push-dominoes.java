@@ -12,17 +12,17 @@ class Solution {
         // for(int i=0;i<n;i++){
         //     System.out.println(left[i]);
         // }
-        String ans = "";
+        StringBuilder ans = new StringBuilder();
         int r = 1000000;
         for(int i=0;i<n;i++){
             if(dominoes.charAt(i)=='R') r = 0;
             else if(dominoes.charAt(i)=='L') r = 1000000;
             else if(r<1000000) r++;
 
-            if(left[i]==r) ans += ".";
-            else if(left[i]>r) ans += "R";
-            else ans += "L";
+            if(left[i]==r) ans.append(".");
+            else if(left[i]>r) ans.append("R");
+            else ans.append("L");
         }
-        return ans;
+        return ans.toString();
     }
 }
