@@ -1,35 +1,17 @@
 class Solution {
-    private long[] DP;
-
-    private long TopDown(int i , int N , List<long[]> P){
-        if(i == N) return 0;
-        if(DP[i] != -1) return DP[i];
-        long c1 = TopDown(i + 1, N, P);
-        long c2 = P.get(i)[1];
-        for (int j = i + 1 ; j <= Math.min(N - 1 , i + 3) ; j++){
-            if(P.get(j)[0] - P.get(i)[0] > 2){
-                c2 += TopDown(j , N , P);
-                break;
-            }
-        }
-        DP[i] = Math.max(c1 , c2);
-        return DP[i];
-    }
-
     public long maximumTotalDamage(int[] power){
-        TreeMap<Integer, Long> hashmap = new TreeMap<>();
-        for(int num : power){
-            hashmap.put(num , hashmap.getOrDefault(num , 0L) + num);
-        } 
+        TreeMap<Integer , Long> dp = new TreeMap<>();
+        for(int P : power) dp.put(P , dp.getOrDefault(P , 0L) + P);
 
-        List<long[]> newPowers = new ArrayList<>();
-        for(Map.Entry<Integer, Long> entry : hashmap.entrySet()){
-            newPowers.add(new long[]{entry.getKey(), entry.getValue()});
+        long maxi = 0 , last = 0;
+
+        for(int P : dp.keySet()){
+            Map.Entry<Integer , Long> it = dp.floorEntry(P - 3);
+            if(it != null) dp.put(P , dp.get(P) + it.getValue());
+            dp.put(P, last = Math.max(dp.get(P) , last));
+            maxi = Math.max(maxi , last);
         }
 
-        int N = newPowers.size();
-        DP = new long[N + 1];
-        Arrays.fill(DP , -1);
-        return TopDown(0, N, newPowers);
+        return maxi;
     }
 }
