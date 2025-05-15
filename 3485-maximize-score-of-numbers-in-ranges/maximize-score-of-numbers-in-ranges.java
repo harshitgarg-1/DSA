@@ -1,9 +1,9 @@
 class Solution {
     public int maxPossibleScore(int[] start, int d) {
+        Arrays.sort(start);
         int low = 0;
         int high = Integer.MAX_VALUE;
         int res = -1;
-        Arrays.sort(start);
 
         while(low <= high){
             int mid = low + (high - low)/2;
@@ -16,7 +16,7 @@ class Solution {
             else high = mid - 1;
         }
 
-        return res;
+        return high;
     }
 
     private boolean isValid(int[] nums, int d, int mid){
