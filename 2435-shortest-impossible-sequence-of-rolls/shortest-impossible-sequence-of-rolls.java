@@ -1,6 +1,6 @@
 class Solution {
         public int shortestSequence(int[] A, int k) {
-        int res = 0;
+        int res = 1;
         Set<Integer> s = new HashSet<>();
         for (int a : A) {
             s.add(a);
@@ -9,6 +9,6 @@ class Solution {
                 s.clear();
             }
         }
-        return res+1;
+        return res;
     }
 }
