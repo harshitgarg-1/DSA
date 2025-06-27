@@ -7,7 +7,6 @@ class Solution {
     if (memo.containsKey(s))
       return memo.get(s);
     if (wordSet.contains(s)) {
-      memo.put(s, true);
       return true;
     }
 
@@ -16,7 +15,6 @@ class Solution {
       final String prefix = s.substring(0, i);
       final String suffix = s.substring(i);
       if (wordSet.contains(prefix) && wordBreak(suffix, wordSet, memo)) {
-        memo.put(s, true);
         return true;
       }
     }
