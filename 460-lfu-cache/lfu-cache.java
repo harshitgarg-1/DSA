@@ -1,123 +1,132 @@
+import java.util.HashMap;
+import java.util.Map;
+
 class LFUCache {
-    int capacity;
-    Map<Integer, LinkedList1> valueReference; // key -> node
-    Map<Integer, Pair> frequencies;          // freq -> doubly linked list
-    int minFrequency;
-    int keyCounts;
+
+    private final int capacity;
+    private int size;
+    private int minFrequency;
+
+    // Maps a key to its node
+    private final Map<Integer, Node> keyToNode;
+    // Maps a frequency to a doubly linked list of nodes
+    private final Map<Integer, DoublyLinkedList> frequencyToNodes;
 
     public LFUCache(int capacity) {
         this.capacity = capacity;
-        valueReference = new HashMap<>();
-        frequencies = new HashMap<>();
-        minFrequency = 0;
-        keyCounts = 0;
+        this.size = 0;
+        this.minFrequency = 0;
+        this.keyToNode = new HashMap<>();
+        this.frequencyToNodes = new HashMap<>();
     }
 
     public int get(int key) {
-        if (!valueReference.containsKey(key)) {
+        if (!keyToNode.containsKey(key)) {
             return -1;
         }
-        LinkedList1 curr = valueReference.get(key);
-        updateFrequency(curr);
-        return curr.value;
-    }
-
-    private void updateFrequency(LinkedList1 curr) {
-        int freq = curr.frequency;
-        // remove from current list
-        Pair oldPair = frequencies.get(freq);
-        curr.prev.next = curr.next;
-        curr.next.prev = curr.prev;
-
-        // if this was the only node at minFrequency, update minFrequency
-        if (freq == minFrequency && oldPair.head.next == oldPair.tail) {
-            minFrequency++;
-        }
-
-        // increase frequency
-        curr.frequency = freq + 1;
-        Pair newPair = frequencies.get(freq + 1);
-        if (newPair == null) {
-            newPair = new Pair(new LinkedList1(0, 0), new LinkedList1(0, 0));
-            newPair.head.next = newPair.tail;
-            newPair.tail.prev = newPair.head;
-            frequencies.put(freq + 1, newPair);
-        }
-
-        // add to the new list (at tail)
-        newPair.tail.prev.next = curr;
-        curr.prev = newPair.tail.prev;
-        curr.next = newPair.tail;
-        newPair.tail.prev = curr;
+        Node node = keyToNode.get(key);
+        increaseFrequency(node);
+        return node.value;
     }
 
     public void put(int key, int value) {
         if (capacity == 0) return;
 
-        if (valueReference.containsKey(key)) {
-            LinkedList1 node = valueReference.get(key);
+        if (keyToNode.containsKey(key)) {
+            // update value and frequency
+            Node node = keyToNode.get(key);
             node.value = value;
-            updateFrequency(node);
+            increaseFrequency(node);
             return;
         }
 
-        if (keyCounts == capacity) {
-            delete();
-        }
-        add(key, value);
-    }
-
-    private void delete() {
-        Pair pair = frequencies.get(minFrequency);
-        LinkedList1 nodeToRemove = pair.head.next;
-
-        // remove node from map and list
-        valueReference.remove(nodeToRemove.key);
-        nodeToRemove.next.prev = pair.head;
-        pair.head.next = nodeToRemove.next;
-
-        keyCounts--;
-    }
-
-    private void add(int key, int value) {
-        LinkedList1 curr = new LinkedList1(key, value);
-        curr.frequency = 1;
-        valueReference.put(key, curr);
-        keyCounts++;
-        minFrequency = 1;
-
-        Pair pair = frequencies.get(minFrequency);
-        if (pair == null) {
-            pair = new Pair(new LinkedList1(0, 0), new LinkedList1(0, 0));
-            pair.head.next = pair.tail;
-            pair.tail.prev = pair.head;
-            frequencies.put(minFrequency, pair);
+        if (size == capacity) {
+            evictLeastFrequentlyUsed();
         }
 
-        // add to frequency 1 list
-        pair.tail.prev.next = curr;
-        curr.prev = pair.tail.prev;
-        curr.next = pair.tail;
-        pair.tail.prev = curr;
+        // create new node with frequency 1
+        Node newNode = new Node(key, value);
+        keyToNode.put(key, newNode);
+        frequencyToNodes
+                .computeIfAbsent(1, f -> new DoublyLinkedList())
+                .addNode(newNode);
+
+        size++;
+        minFrequency = 1; // new node has freq 1
+    }
+
+    // ------------ Helper Methods ------------
+
+    private void increaseFrequency(Node node) {
+        int currentFreq = node.frequency;
+        DoublyLinkedList currentList = frequencyToNodes.get(currentFreq);
+        currentList.removeNode(node);
+
+        // if this node was the last in the minFrequency list, increase minFrequency
+        if (currentFreq == minFrequency && currentList.isEmpty()) {
+            minFrequency++;
+        }
+
+        node.frequency++;
+        frequencyToNodes
+                .computeIfAbsent(node.frequency, f -> new DoublyLinkedList())
+                .addNode(node);
+    }
+
+    private void evictLeastFrequentlyUsed() {
+        DoublyLinkedList list = frequencyToNodes.get(minFrequency);
+        Node nodeToRemove = list.removeFirst();
+        keyToNode.remove(nodeToRemove.key);
+        size--;
+    }
+
+    // ------------ Internal Classes ------------
+
+    private static class Node {
+        int key, value, frequency;
+        Node prev, next;
+
+        Node(int key, int value) {
+            this.key = key;
+            this.value = value;
+            this.frequency = 1;
+        }
+    }
+
+    private static class DoublyLinkedList {
+        private final Node head;
+        private final Node tail;
+
+        DoublyLinkedList() {
+            head = new Node(0, 0);
+            tail = new Node(0, 0);
+            head.next = tail;
+            tail.prev = head;
+        }
+
+        void addNode(Node node) {
+            // always add to the end (before tail)
+            node.next = tail;
+            node.prev = tail.prev;
+            tail.prev.next = node;
+            tail.prev = node;
+        }
+
+        void removeNode(Node node) {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+        }
+
+        Node removeFirst() {
+            if (isEmpty()) return null;
+            Node first = head.next;
+            removeNode(first);
+            return first;
+        }
+
+        boolean isEmpty() {
+            return head.next == tail;
+        }
     }
 }
 
-class LinkedList1 {
-    LinkedList1 prev, next;
-    int key, value, frequency;
-
-    LinkedList1(int k, int v) {
-        key = k;
-        value = v;
-        frequency = 0;
-    }
-}
-
-class Pair {
-    LinkedList1 head, tail;
-
-    Pair(LinkedList1 h, LinkedList1 t) {
-        head = h;
-        tail = t;
-    }
-}
