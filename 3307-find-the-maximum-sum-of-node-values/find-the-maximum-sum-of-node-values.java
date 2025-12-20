@@ -10,20 +10,17 @@ class Solution {
         }
 
         Arrays.sort(netChange);
-        // Reverse the sorted array
-        for (int i = 0; i < n / 2; i++) {
-            int temp = netChange[i];
-            netChange[i] = netChange[n - 1 - i];
-            netChange[n - 1 - i] = temp;
-        }
+        // for (int i = 0; i < n / 2; i++) {
+        //     int temp = netChange[i];
+        //     netChange[i] = netChange[n - 1 - i];
+        //     netChange[n - 1 - i] = temp;
+        // }
 
-        for (int i = 0; i < n; i += 2) {
-            // If netChange contains odd number of elements break the loop
-            if (i + 1 == n) {
+        for (int i = n-1; i >=0; i -= 2) {
+            if (i -1 <0) {
                 break;
             }
-            long pairSum = netChange[i] + netChange[i + 1];
-            // Include in nodeSum if pairSum is positive
+            long pairSum = netChange[i] + netChange[i - 1];
             if (pairSum > 0) {
                 nodeSum += pairSum;
             }
